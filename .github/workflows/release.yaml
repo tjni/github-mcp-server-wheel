@@ -1,0 +1,178 @@
+name: Release
+
+on:
+  workflow_dispatch
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install the latest version of uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version-file: "pyproject.toml"
+
+      - name: Build Linux x86-64 wheel
+        env:
+          PLAT: linux
+          ARCH: x86_64
+        run: |
+          rm -rf bin
+          uv build --wheel
+
+      - name: Build Linux arm64 wheel
+        env:
+          PLAT: linux
+          ARCH: arm64
+        run: |
+          rm -rf bin
+          uv build --wheel
+
+      - name: Build macOS x86-64 wheel
+        env:
+          PLAT: macosx
+          ARCH: x86_64
+        run: |
+          rm -rf bin
+          uv build --wheel
+
+      - name: Build macOS arm64 wheel
+        env:
+          PLAT: macosx
+          ARCH: arm64
+        run: |
+          rm -rf bin
+          uv build --wheel
+
+      - name: Build Windows x86-64 wheel
+        env:
+          PLAT: win
+          ARCH: x86_64
+        run: |
+          rm -rf bin
+          uv build --wheel
+
+      - name: Build Windows arm64 wheel
+        env:
+          PLAT: win
+          ARCH: arm64
+        run: |
+          rm -rf bin
+          uv build --wheel
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  #test-pypi-publish:
+  #  needs: build
+#
+#    runs-on: ubuntu-latest
+#
+#    environment:
+#      name: testpypi
+#      url: https://test.pypi.org/p/github-mcp-server-unofficial
+#
+#    permissions:
+#      id-token: write
+#
+#    steps:
+#      - uses: actions/download-artifact@v4
+#
+#      - name: Publish to TestPyPI
+#        uses: pypa/gh-action-pypi-publish@release/v1
+#        with:
+#          repository-url: https://test.pypi.org/legacy/
+#          verbose: true
+
+  #test:
+#    needs: test-pypi-publish
+#
+#    runs-on: ${{ matrix.os }}
+#    strategy:
+#      fail-fast: false
+#      matrix:
+#        os: [ubuntu-latest, windows-latest, macos-latest, ubuntu-24.04-arm, macos-13]
+#
+#    steps:
+#      - uses: actions/checkout@v4
+#
+#      - name: Install the latest version of uv
+#        uses: astral-sh/setup-uv@v5
+#
+#      - name: Set up Python
+#        uses: actions/setup-python@v5
+#        with:
+#          python-version-file: "pyproject.toml"
+#
+#      - name: Execute using uv
+#        env:
+#          UV_DEFAULT_INDEX: https://test.pypi.org/simple/
+#        run: |
+#          uvx --from github-mcp-server-unofficial github-mcp-server
+#
+#      - name: Execute from a Python script
+#        env:
+#          UV_DEFAULT_INDEX: https://test.pypi.org/simple/
+#        run: uv run --no-project src/test_github_mcp_server.py
+#
+#  pypi-publish:
+#   needs: test
+#
+#    runs-on: ubuntu-latest
+#
+#    environment:
+#      name: pypi
+#      url: https://pypi.org/p/github-mcp-server-unofficial
+#
+#    permissions:
+#      id-token: write
+#
+#    steps:
+#      - uses: actions/download-artifact@v4
+#
+#      - name: Publish to PyPI
+#        uses: pypa/gh-action-pypi-publish@release/v1
+#
+  release:
+    #needs: test
+    needs: build
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install the latest version of uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version-file: "pyproject.toml"
+
+      - uses: actions/download-artifact@v4
+
+      - name: Get version
+        id: get_version
+        run: echo "VERSION=$(uvx hatch version)" >> $GITHUB_OUTPUT
+
+      - name: Release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: "dist/*"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          generateReleaseNotes: false
+          body: https://github.com/github/github-mcp-server/releases/tag/v${{ steps.get_version.outputs.VERSION }}
+          tag: v${{ steps.get_version.outputs.VERSION }}
+          commit: ${{ github.sha }}

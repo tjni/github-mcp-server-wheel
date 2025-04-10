@@ -1,0 +1,45 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "github-mcp-server-unofficial"
+version = "0.1.0"
+description = "GitHub's official MCP Server packaged unofficially for Python"
+authors = [
+  { name = "Theodore Ni", email = "3806110+tjni@users.noreply.github.com" },
+]
+requires-python = ">=3.9"
+keywords = ["github", "MCP"]
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "Environment :: Console",
+  "Intended Audience :: Developers",
+  "Operating System :: OS Independent",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3 :: Only",
+  "Topic :: Software Development :: Version Control :: Git",
+]
+readme = "README.md"
+dependencies = []
+
+[project.urls]
+Repository = "https://github.com/tjni/github-mcp-server-wheel"
+
+[dependency-groups]
+dev = ["ruff"]
+
+[tool.hatch.build.hooks.custom]
+
+[tool.hatch.build.targets.wheel]
+sources = ["src"]
+only-include = ["src/github_mcp_server.py"]
+
+[tool.hatch.build.targets.wheel.shared-scripts]
+"bin" = "/"
