@@ -65,10 +65,10 @@ def download_binary(version: str, platform: str, arch: str):
                 target_file.chmod(0o755)
             case "zip":
                 with tempfile.NamedTemporaryFile() as temp_file:
-                    shutil.copyfileobj(response, temp_file)
+                    temp_file.write(response.read())
                     temp_file_path = temp_file.name
 
-                    with zipfile.ZipFile(temp_file_path, "r") as zip:
+                    with zipfile.ZipFile(temp_file_path) as zip:
                         info = zip.getinfo(binary_name)
                         with zip.open(info) as source, target_file.open("wb") as target:
                             shutil.copyfileobj(source, target)
