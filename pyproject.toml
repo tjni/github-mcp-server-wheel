@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "github-mcp-server-unofficial"
-version = "0.8.0"
+version = "0.9.1"
 description = "GitHub's official MCP Server packaged unofficially for Python"
 authors = [
   { name = "Theodore Ni", email = "3806110+tjni@users.noreply.github.com" },
